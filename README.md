@@ -70,10 +70,10 @@ Launch a sweep:
 
 ```bash
 # Dry-run: log resolved spec without calling Modal
-uv run python -m my_app --multirun hydra.launcher.dry_run=true lr=0.001,0.01,0.1
+uv run my_app.py --multirun hydra.launcher.dry_run=true lr=0.001,0.01,0.1
 
 # Real run (Modal credentials in env)
-uv run python -m my_app --multirun lr=0.001,0.01,0.1
+uv run my_app.py --multirun lr=0.001,0.01,0.1
 ```
 
 ## Common recipes
