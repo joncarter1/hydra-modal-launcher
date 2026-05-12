@@ -18,11 +18,11 @@ from hydra.types import HydraContext, TaskFunction
 from omegaconf import DictConfig, OmegaConf, open_dict
 
 from .config import ModalLauncherConf
+from ._paths import _PROJECT_ROOT_MARKERS, _detect_project_root  # noqa: F401  (re-exported for tests)
 
 log = logging.getLogger(__name__)
 
 
-_PROJECT_ROOT_MARKERS = ("pyproject.toml", "setup.py", "setup.cfg", ".git")
 _DEFAULT_PROJECT_IGNORES = (
     "**/.venv/**",
     "**/venv/**",
@@ -40,22 +40,6 @@ _DEFAULT_PROJECT_IGNORES = (
     "**/outputs/**",
     "**/.DS_Store",
 )
-
-
-def _detect_project_root(start_path: Path) -> Path | None:
-    """Walk up from ``start_path`` looking for a project-root marker file.
-
-    Returns the first ancestor directory containing any of
-    ``pyproject.toml`` / ``setup.py`` / ``setup.cfg`` / ``.git``, or ``None``
-    if the filesystem root is hit before a marker is found.
-    """
-    cur = start_path.resolve()
-    while True:
-        if any((cur / m).exists() for m in _PROJECT_ROOT_MARKERS):
-            return cur
-        if cur.parent == cur:
-            return None
-        cur = cur.parent
 
 
 class ModalLauncher(Launcher):

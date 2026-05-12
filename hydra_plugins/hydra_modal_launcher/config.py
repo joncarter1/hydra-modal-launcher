@@ -21,6 +21,16 @@ class ModalImageConf:
     base: str = "debian_slim"
     base_image: Optional[str] = None
     pip_packages: List[str] = field(default_factory=list)
+    # Path to a pip requirements file; forwarded to
+    # ``Image.pip_install_from_requirements``. Composable with ``pip_packages``
+    # and the pyproject fields.
+    pip_requirements: Optional[str] = None
+    # Path to a ``pyproject.toml`` whose ``[project].dependencies`` are
+    # installed via ``Image.pip_install_from_pyproject``.
+    pip_pyproject: Optional[str] = None
+    # Optional extras keys for ``pip_pyproject``; forwarded as
+    # ``optional_dependencies=[...]``.
+    pip_pyproject_extras: List[str] = field(default_factory=list)
     apt_packages: List[str] = field(default_factory=list)
     run_commands: List[str] = field(default_factory=list)
     env: Dict[str, str] = field(default_factory=dict)

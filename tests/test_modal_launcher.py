@@ -31,6 +31,9 @@ from hydra_plugins.hydra_modal_launcher.modal_launcher import (
     ModalLauncher,
     _detect_project_root,
 )
+from hydra_plugins.hydra_modal_launcher._paths import (
+    _resolve_against_project_root,
+)
 
 
 def test_config_store_registration():
@@ -78,10 +81,40 @@ def test_build_image_spec_preserves_user_version_pin_for_required_deps():
 def test_build_image_spec_with_image_builder_ignores_other_fields():
     image_cfg = ModalImageConf(
         pip_packages=["torch"],
+        pip_requirements="requirements.txt",
+        pip_pyproject="pyproject.toml",
+        pip_pyproject_extras=["training"],
         image_builder="my.module.build_image",
     )
     spec = build_image_spec(image_cfg)
     assert spec == {"image_builder": "my.module.build_image"}
+
+
+def test_build_image_spec_passes_through_pip_requirements():
+    spec = build_image_spec(ModalImageConf(pip_requirements="requirements.txt"))
+    assert spec["pip_requirements"] == "requirements.txt"
+    # Defaults for the other dep sources stay empty / None.
+    assert spec["pip_pyproject"] is None
+    assert spec["pip_pyproject_extras"] == []
+
+
+def test_build_image_spec_passes_through_pip_pyproject_and_extras():
+    spec = build_image_spec(
+        ModalImageConf(
+            pip_pyproject="pyproject.toml",
+            pip_pyproject_extras=["training", "viz"],
+        )
+    )
+    assert spec["pip_pyproject"] == "pyproject.toml"
+    assert spec["pip_pyproject_extras"] == ["training", "viz"]
+    assert spec["pip_requirements"] is None
+
+
+def test_build_image_spec_dep_sources_default_to_none():
+    spec = build_image_spec(ModalImageConf())
+    assert spec["pip_requirements"] is None
+    assert spec["pip_pyproject"] is None
+    assert spec["pip_pyproject_extras"] == []
 
 
 def test_build_function_kwargs_serial():
@@ -166,6 +199,47 @@ def test_detect_project_root_walks_past_unmarked_subdir(tmp_path):
     deep = tmp_path / "a" / "b" / "c"
     deep.mkdir(parents=True)
     assert _detect_project_root(deep) == tmp_path.resolve()
+
+
+def test_resolve_against_project_root_passes_through_absolute(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    abs_path = str(tmp_path / "nope.txt")
+    # Absolute paths never trigger the walk-up, even when the file is absent.
+    assert _resolve_against_project_root(abs_path) == abs_path
+
+
+def test_resolve_against_project_root_passes_through_existing_cwd_relative(tmp_path, monkeypatch):
+    (tmp_path / "pyproject.toml").write_text("")
+    sub = tmp_path / "sub"
+    sub.mkdir()
+    (sub / "requirements.txt").write_text("")
+    monkeypatch.chdir(sub)
+    # File exists CWD-relative, so the resolver yields to Modal's default
+    # semantics rather than rewriting to the project-root absolute path.
+    assert _resolve_against_project_root("requirements.txt") == "requirements.txt"
+
+
+def test_resolve_against_project_root_walks_up_to_find_file(tmp_path, monkeypatch):
+    (tmp_path / "pyproject.toml").write_text("")
+    (tmp_path / "requirements.txt").write_text("")
+    nested = tmp_path / "scripts"
+    nested.mkdir()
+    monkeypatch.chdir(nested)
+    # No requirements.txt at CWD; walk-up finds project root and the file is
+    # there, so the resolver returns the absolute path.
+    assert _resolve_against_project_root("requirements.txt") == str(
+        (tmp_path / "requirements.txt").resolve()
+    )
+
+
+def test_resolve_against_project_root_returns_original_on_miss(tmp_path, monkeypatch):
+    (tmp_path / "pyproject.toml").write_text("")
+    nested = tmp_path / "scripts"
+    nested.mkdir()
+    monkeypatch.chdir(nested)
+    # File doesn't exist anywhere; we hand back the original string so Modal
+    # raises a clear FileNotFoundError at build time.
+    assert _resolve_against_project_root("does-not-exist.txt") == "does-not-exist.txt"
 
 
 def test_detect_project_root_finds_git_dir(tmp_path):

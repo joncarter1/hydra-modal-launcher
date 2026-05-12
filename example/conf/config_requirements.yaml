@@ -1,0 +1,19 @@
+defaults:
+  - _self_
+  - override hydra/launcher: modal
+
+lr: 0.01
+epochs: 10
+
+hydra:
+  launcher:
+    app_name: hydra-modal-example-requirements
+    parallelism: 2
+    image:
+      # Path is opened on the host at app-build time and resolved relative to
+      # CWD, so invoke from the project root (`uv run example/my_app.py ...`).
+      pip_requirements: example/requirements.txt
+    function:
+      cpu: 0.5
+      memory: 1024
+      timeout: 120

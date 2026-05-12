@@ -5,11 +5,14 @@ config-to-spec mapping don't require ``modal`` to be installed.
 """
 from __future__ import annotations
 
+import logging
+import sys
 from typing import Any, Callable
 
-import sys
-
 from .config import ModalFunctionConf, ModalImageConf, ModalLauncherConf
+from ._paths import _resolve_against_project_root
+
+log = logging.getLogger(__name__)
 
 
 def _host_python_version() -> str:
@@ -34,6 +37,9 @@ def build_image_spec(image_cfg: ModalImageConf) -> dict[str, Any]:
         "pip_packages": _merge_pip_packages(
             image_cfg.pip_packages, _required_runtime_specs()
         ),
+        "pip_requirements": image_cfg.pip_requirements,
+        "pip_pyproject": image_cfg.pip_pyproject,
+        "pip_pyproject_extras": list(image_cfg.pip_pyproject_extras),
         "apt_packages": sorted(image_cfg.apt_packages),
         "run_commands": list(image_cfg.run_commands),
         "env": dict(image_cfg.env),
@@ -76,6 +82,16 @@ def _resolve_image_builder(dotted: str) -> Callable[[ModalImageConf], Any]:
     from hydra.utils import get_method
 
     return get_method(dotted)
+
+
+def _resolve_path(field_name: str, raw: str) -> str:
+    """Resolve a config-supplied path with project-root awareness, logging when
+    the resolution actually changed the path so dry-run users aren't surprised.
+    """
+    resolved = _resolve_against_project_root(raw)
+    if resolved != raw:
+        log.info("Resolved %s %r -> %r", field_name, raw, resolved)
+    return resolved
 
 
 # Runtime deps the worker module imports on the remote container.
@@ -163,6 +179,17 @@ def _build_image(image_cfg: ModalImageConf):
 
     if image_cfg.apt_packages:
         img = img.apt_install(*sorted(image_cfg.apt_packages))
+    # Heavier / more stable installs first so changes to ``pip_packages``
+    # don't invalidate the larger transitive-dep layers on rebuild.
+    if image_cfg.pip_pyproject:
+        resolved = _resolve_path("pip_pyproject", image_cfg.pip_pyproject)
+        img = img.pip_install_from_pyproject(
+            resolved,
+            optional_dependencies=list(image_cfg.pip_pyproject_extras),
+        )
+    if image_cfg.pip_requirements:
+        resolved = _resolve_path("pip_requirements", image_cfg.pip_requirements)
+        img = img.pip_install_from_requirements(resolved)
     pip_packages = _merge_pip_packages(image_cfg.pip_packages, _required_runtime_specs())
     if pip_packages:
         img = img.pip_install(*pip_packages)

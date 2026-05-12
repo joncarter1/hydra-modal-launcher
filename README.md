@@ -9,6 +9,7 @@ Each Hydra job runs as one invocation of a Modal function. The image and functio
 - [Install](#install)
 - [Quick start](#quick-start)
 - [Common recipes](#common-recipes)
+  - [Path resolution](#path-resolution)
 - [Configuration reference](#configuration-reference)
 - [Per-job outputs](#per-job-outputs)
 - [How the user's code reaches the container](#how-the-users-code-reaches-the-container)
@@ -133,6 +134,39 @@ hydra:
       image_builder: custom_image.build_image    # every other image.* field is ignored
 ```
 
+### Install deps from a requirements file or pyproject
+
+For projects with more than a handful of pins, point the launcher at your existing dep manifest instead of duplicating entries in `pip_packages`. Both fields are composable — and additive with `pip_packages` (which still wins on name collision with the auto-pinned runtime deps).
+
+```yaml
+hydra:
+  launcher:
+    image:
+      pip_requirements: requirements.txt          # passed to Image.pip_install_from_requirements
+```
+
+```yaml
+hydra:
+  launcher:
+    image:
+      pip_pyproject: pyproject.toml               # passed to Image.pip_install_from_pyproject
+      pip_pyproject_extras: [training]            # → optional_dependencies=[...]
+      pip_packages: [extra-debug-tool]            # still merged on top
+```
+
+Install layers are emitted heavy-first (`pip_pyproject` → `pip_requirements` → `pip_packages`), so editing `pip_packages` between runs doesn't invalidate the large transitive-dep layer.
+
+#### Path resolution
+
+`pip_pyproject` and `pip_requirements` accept both absolute and relative paths. Relative paths follow this order:
+
+1. **Absolute paths** are used as-is.
+2. **Relative paths that exist relative to CWD** are passed through unchanged — Modal's default behaviour.
+3. **Otherwise**, the launcher walks up from CWD looking for the nearest `pyproject.toml` / `setup.py` / `setup.cfg` / `.git`, and if the file exists there, uses that absolute path. The resolution is logged.
+4. **No match anywhere** — the path is handed to Modal unchanged so the resulting `FileNotFoundError` surfaces at build time.
+
+This means you can invoke `uv run scripts/train.py` from any subdir and `pip_pyproject: pyproject.toml` will still find the project's root pyproject — same DWIM the launcher already does for source mounting.
+
 ### Pin extra deps without losing the auto-pinned runtime deps
 
 The plugin auto-adds `hydra-core==<host_version>` and `cloudpickle==<host_version>` to every built image. Your `pip_packages` entries are merged with these; on a name collision, your pin wins.
@@ -157,6 +191,9 @@ hydra:
 | `base` | `"debian_slim"` | or `"from_registry"` |
 | `base_image` | `null` | required when `base="from_registry"` |
 | `pip_packages` | `[]` | sorted before install for cache stability; merged with auto-pinned `hydra-core` + `cloudpickle` |
+| `pip_requirements` | `null` | path to a requirements file; passed to `Image.pip_install_from_requirements`. Relative paths are resolved against the nearest project root (see [Path resolution](#path-resolution)). |
+| `pip_pyproject` | `null` | path to a `pyproject.toml`; passed to `Image.pip_install_from_pyproject`. Same resolution rules as `pip_requirements`. |
+| `pip_pyproject_extras` | `[]` | extras keys for `pip_pyproject`, forwarded as `optional_dependencies=[...]` |
 | `apt_packages` | `[]` | |
 | `run_commands` | `[]` | extra `RUN` lines |
 | `env` | `{}` | env vars baked into the image |

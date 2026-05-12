@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `image.pip_requirements` config field — path to a pip requirements file, forwarded to `Image.pip_install_from_requirements`. Composable with `pip_packages`.
+- `image.pip_pyproject` config field — path to a `pyproject.toml`, forwarded to `Image.pip_install_from_pyproject`.
+- `image.pip_pyproject_extras` config field — extras keys passed as `optional_dependencies=[...]` to the pyproject install.
+- Install layers are emitted in heavy-to-light order (`pip_install_from_pyproject` → `pip_install_from_requirements` → `pip_install`) so edits to `pip_packages` don't invalidate the large transitive-dep layers on rebuild.
+- Project-root-aware resolution for `pip_pyproject` and `pip_requirements`: relative paths that aren't found at CWD are resolved against the nearest ancestor containing `pyproject.toml` / `setup.py` / `setup.cfg` / `.git`. Absolute paths and CWD-relative-that-exist paths pass through unchanged. Resolved paths are logged.
+
 ## [0.1.0] - 2026-05-12
 
 ### Added

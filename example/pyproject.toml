@@ -1,0 +1,9 @@
+# Demo file for example/conf/config_pyproject.yaml.
+#
+# Modal's pip_install_from_pyproject only reads [project].dependencies, so this
+# file is not a real distributable package — it just declares the deps to install
+# into the demo's Modal image.
+[project]
+name = "example-deps"
+version = "0"
+dependencies = ["tabulate"]

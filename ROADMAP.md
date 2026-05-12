@@ -38,9 +38,15 @@ Open items the maintainer flagged but deferred from v0.1.0. None are blockers; t
 
 ## Features
 
-### `requirements.txt` mode
+### uv lockfile mode
 
-Single source of truth for user training deps. Today, users duplicate their pins in `image.pip_packages`. A first-class `image.requirements_txt: "requirements.txt"` field that becomes a `pip install -r` step in the built image would remove the duplication.
+Tier 1 of the dep-shipping design landed: `image.pip_requirements` and `image.pip_pyproject` (+ `pip_pyproject_extras`) thin-wrap `Image.pip_install_from_requirements` / `Image.pip_install_from_pyproject`. Two further tiers remain:
+
+**Tier 2 — explicit `uv.lock`.** New `image.uv_lock: "uv.lock"` field. On the host, run `uv export --frozen --no-dev --format requirements-txt --python-platform x86_64-unknown-linux-gnu`, write the result to a tempfile, install via `Image.pip_install_from_requirements`. The container never needs `uv`. Optional `uv_lock_groups` / `uv_lock_extras` for finer control. Closes the reproducibility gap that `pip_pyproject` leaves (pyproject deps are ranges; lockfile is pinned).
+
+**Tier 3 — `match_host: true`.** Zero-config: walk up from CWD using the existing `_detect_project_root` logic, find the nearest `pyproject.toml` + `uv.lock`, and apply Tier 2 automatically. Equivalent of "what's on my laptop is what's on the container," extending the same host-introspection pattern as `_required_runtime_specs()`.
+
+Both tiers introduce a host dependency on `uv`. Worth gating behind a clear error when `uv` is missing rather than silently falling back.
 
 ### Pre-deployed app / `Function.from_name` workflow
 
