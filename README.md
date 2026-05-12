@@ -18,8 +18,6 @@ Each Hydra job runs as one invocation of a Modal function. The image and functio
 - [Limitations](#limitations)
 - [Troubleshooting](#troubleshooting)
 - [Testing](#testing)
-- [Releasing](#releasing)
-- [Roadmap](#roadmap)
 
 ## Install
 
@@ -266,7 +264,6 @@ hydra-modal-launcher/
 ├── example/                               # Layout-A demo (entry: `uv run python -m example.my_app`)
 ├── tests/                                 # pure unit tests, no Modal account required
 ├── AGENTS.md                              # ← read this if you're an AI agent
-├── ROADMAP.md                             # known gaps + planned work
 └── CHANGELOG.md
 ```
 
@@ -282,7 +279,7 @@ For deeper conventions and invariants — what's pure vs impure, where Modal can
 
 - No `checkpoint` / preemption support — Modal has no equivalent of SLURM's signal protocol.
 - No automatic sync of remote working dirs back to your laptop. Use volumes if you need it.
-- Ephemeral apps only (`with app.run():`). Pre-deployed apps via `Function.from_name` are not yet supported — see [`ROADMAP.md`](ROADMAP.md).
+- Ephemeral apps only (`with app.run():`). Pre-deployed apps via `Function.from_name` are not yet supported.
 - Image is rebuilt once per `launch()` call. Modal caches build layers so subsequent runs are fast.
 
 ## Troubleshooting
@@ -326,25 +323,3 @@ uv run pytest tests/
 
 `uv.lock` is committed, so the sync is reproducible. Unit tests don't require a Modal account; the orchestration is pure functions where possible.
 
-## Releasing
-
-Releases are cut by pushing a SemVer tag like `v0.1.0`. GitHub Actions builds an sdist + wheel and publishes to PyPI via [trusted publishing](https://docs.pypi.org/trusted-publishers/) (OIDC — no API tokens stored anywhere).
-
-**First-time setup** (one-off):
-1. Create the project on PyPI, or add a pending publisher: PyPI → Your Account → Publishing → Add a new pending publisher with owner `joncarter1`, repo `hydra-modal-launcher`, workflow `publish.yml`, environment `pypi`.
-2. In this repo: Settings → Environments → New environment → name `pypi`.
-
-**Cutting a release:**
-```bash
-# bump version in pyproject.toml + hydra_plugins/hydra_modal_launcher/__init__.py
-# update CHANGELOG.md (move Unreleased → [x.y.z])
-git commit -am "release: vX.Y.Z"
-git tag vX.Y.Z
-git push origin main --tags
-```
-
-The `publish.yml` workflow fires on tag push.
-
-## Roadmap
-
-Known gaps and planned work live in [`ROADMAP.md`](ROADMAP.md). Convert to GitHub Issues once the repo is up.
