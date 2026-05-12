@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-05-12
+
 ### Added
 - `image.pip_requirements` config field — path to a pip requirements file, forwarded to `Image.pip_install_from_requirements`. Composable with `pip_packages`.
 - `image.pip_pyproject` config field — path to a `pyproject.toml`, forwarded to `Image.pip_install_from_pyproject`.
@@ -29,5 +31,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Auto-pinning of required runtime deps (`hydra-core`, `cloudpickle`) to the host's installed versions when adding them to the image; user-supplied version pins win on name collision.
 - Remote container stdout streamed to the local terminal via `modal.enable_output()`.
 
-[Unreleased]: https://github.com/joncarter1/hydra-modal-launcher/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/joncarter1/hydra-modal-launcher/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/joncarter1/hydra-modal-launcher/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/joncarter1/hydra-modal-launcher/releases/tag/v0.1.0
