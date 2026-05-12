@@ -11,7 +11,7 @@ hydra:
     parallelism: 2
     image:
       # Every other field under image: is ignored when image_builder is set.
-      image_builder: example.custom_image.build_image
+      image_builder: custom_image.build_image
     function:
       cpu: 0.5
       memory: 1024

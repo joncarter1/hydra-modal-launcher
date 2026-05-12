@@ -16,7 +16,7 @@ hydra_plugins/hydra_modal_launcher/
 ├── _modal_app.py          # Pure builders: ModalLauncherConf -> modal.App + modal.Image + modal.Function
 ├── _worker.py             # Top-level fn shipped to Modal containers; mirrors hydra_ray_launcher._launcher_util
 └── py.typed
-example/                   # Layout-A demo (entrypoint = `python -m example.my_app`)
+example/                   # Layout-A demo (entrypoint = `uv run example/my_app.py`)
 tests/                     # Pure unit tests; no Modal account required
 ```
 
@@ -69,7 +69,7 @@ See "Releasing" in `README.md`. SemVer tag `vX.Y.Z` → `publish.yml` builds + p
 | Image spec / function kwargs / pip merging | Unit tests |
 | `_to_job_return` exception mapping | Unit test |
 | `_detect_project_root` for Layout B | Unit tests |
-| End-to-end on Modal — Layout A (`python -m example.my_app`) | Live run |
+| End-to-end on Modal — Layout A (`uv run example/my_app.py`) | Live run |
 | End-to-end on Modal — Layout B (project-root mount of `/tmp/research-repo`) | Live run |
 | Wheel installs from fresh `uv venv` and plugin discovery still works | Live |
 | **End-to-end failure path** | NOT verified live — see `ROADMAP.md` |

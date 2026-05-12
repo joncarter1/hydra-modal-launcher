@@ -115,7 +115,7 @@ hydra:
 ### Custom image builder (full Python control)
 
 ```python
-# example/custom_image.py
+# custom_image.py at the project root (or anywhere on your sys.path)
 import modal
 
 def build_image(image_cfg) -> modal.Image:
@@ -130,7 +130,7 @@ def build_image(image_cfg) -> modal.Image:
 hydra:
   launcher:
     image:
-      image_builder: example.custom_image.build_image    # every other image.* field is ignored
+      image_builder: custom_image.build_image    # every other image.* field is ignored
 ```
 
 ### Pin extra deps without losing the auto-pinned runtime deps
@@ -261,7 +261,7 @@ hydra-modal-launcher/
 │   ├── modal_launcher.py                  # ModalLauncher(Launcher)
 │   ├── _modal_app.py                      # pure + impure builders for modal.App / Image / Function
 │   └── _worker.py                         # ships to the Modal container
-├── example/                               # Layout-A demo (entry: `uv run python -m example.my_app`)
+├── example/                               # Layout-A demo (entry: `uv run example/my_app.py`)
 ├── tests/                                 # pure unit tests, no Modal account required
 ├── AGENTS.md                              # ← read this if you're an AI agent
 └── CHANGELOG.md
