@@ -55,7 +55,7 @@ Touch `_worker.py:modal_entry`. Keep imports lazy (inside the function body), ma
 
 ### Bump a dependency
 
-`pyproject.toml` + matching version comment in `_modal_app.py` (for `modal` specifically). Then `uv build && twine check dist/*` to confirm metadata still validates.
+`pyproject.toml` + matching version comment in `_modal_app.py` (for `modal` specifically). Then `uv lock` to update `uv.lock`, and `uv build && uv run twine check dist/*` to confirm metadata still validates. CI uses `uv sync --extra dev` against the lock, so an out-of-sync lock fails the run.
 
 ### Cut a release
 

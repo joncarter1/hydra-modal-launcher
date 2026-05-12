@@ -19,15 +19,12 @@ jobs:
         uses: astral-sh/setup-uv@v4
         with:
           enable-cache: true
-          cache-dependency-glob: "**/pyproject.toml"
 
       - name: Set up Python ${{ matrix.python-version }}
         run: uv python install ${{ matrix.python-version }}
 
-      - name: Install
-        run: uv pip install --system -e ".[dev]"
-        env:
-          UV_SYSTEM_PYTHON: "1"
+      - name: Sync deps (locked)
+        run: uv sync --extra dev --python ${{ matrix.python-version }}
 
       - name: Test
-        run: pytest tests/ -v
+        run: uv run pytest tests/ -v

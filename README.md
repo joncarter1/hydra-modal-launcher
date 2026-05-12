@@ -320,12 +320,11 @@ Add `hydra.launcher.dry_run=true` to any sweep. The launcher logs the resolved i
 ## Testing
 
 ```bash
-uv venv && source .venv/bin/activate
-uv pip install -e ".[dev]"
-pytest tests/
+uv sync --extra dev
+uv run pytest tests/
 ```
 
-Unit tests don't require a Modal account; the orchestration is pure functions where possible.
+`uv.lock` is committed, so the sync is reproducible. Unit tests don't require a Modal account; the orchestration is pure functions where possible.
 
 ## Releasing
 
