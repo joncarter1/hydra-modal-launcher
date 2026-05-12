@@ -70,10 +70,10 @@ Launch a sweep:
 
 ```bash
 # Dry-run: log resolved spec without calling Modal
-python -m my_app --multirun hydra.launcher.dry_run=true lr=0.001,0.01,0.1
+uv run python -m my_app --multirun hydra.launcher.dry_run=true lr=0.001,0.01,0.1
 
 # Real run (Modal credentials in env)
-python -m my_app --multirun lr=0.001,0.01,0.1
+uv run python -m my_app --multirun lr=0.001,0.01,0.1
 ```
 
 ## Common recipes
@@ -263,7 +263,7 @@ hydra-modal-launcher/
 │   ├── modal_launcher.py                  # ModalLauncher(Launcher)
 │   ├── _modal_app.py                      # pure + impure builders for modal.App / Image / Function
 │   └── _worker.py                         # ships to the Modal container
-├── example/                               # Layout-A demo (entry: `python -m example.my_app`)
+├── example/                               # Layout-A demo (entry: `uv run python -m example.my_app`)
 ├── tests/                                 # pure unit tests, no Modal account required
 ├── AGENTS.md                              # ← read this if you're an AI agent
 ├── ROADMAP.md                             # known gaps + planned work

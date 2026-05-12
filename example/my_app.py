@@ -3,8 +3,8 @@
 See ``example/README.md`` for the two variants (basic, custom_image) and
 the dry-run flag. Quick refresher:
 
-    python -m example.my_app --multirun lr=0.001,0.01,0.1
-    python -m example.my_app --config-name=config_custom --multirun lr=0.001,0.01,0.1
+    uv run python -m example.my_app --multirun lr=0.001,0.01,0.1
+    uv run python -m example.my_app --config-name=config_custom --multirun lr=0.001,0.01,0.1
 """
 from __future__ import annotations
 

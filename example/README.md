@@ -5,7 +5,7 @@ Two ways to run the same `my_app.py`, showing both image-customisation paths.
 ## 1. Basic — YAML-driven image
 
 ```bash
-python -m example.my_app --multirun lr=0.001,0.01,0.1
+uv run python -m example.my_app --multirun lr=0.001,0.01,0.1
 ```
 
 Config: [`conf/config.yaml`](conf/config.yaml). The launcher builds the image from `image.pip_packages` and friends, and auto-pins runtime deps (`hydra-core`, `cloudpickle`) to your host's installed versions.
@@ -13,7 +13,7 @@ Config: [`conf/config.yaml`](conf/config.yaml). The launcher builds the image fr
 ## 2. Custom image — full Python control
 
 ```bash
-python -m example.my_app --config-name=config_custom --multirun lr=0.001,0.01,0.1
+uv run python -m example.my_app --config-name=config_custom --multirun lr=0.001,0.01,0.1
 ```
 
 Config: [`conf/config_custom.yaml`](conf/config_custom.yaml), pointing at the builder in [`custom_image.py`](custom_image.py).
@@ -25,7 +25,7 @@ When `image.image_builder` is set, every other field under `image:` is ignored �
 Add `hydra.launcher.dry_run=true` to log the resolved image + function spec without spending a cent on Modal:
 
 ```bash
-python -m example.my_app --config-name=config_custom \
+uv run python -m example.my_app --config-name=config_custom \
     --multirun hydra.launcher.dry_run=true lr=0.001,0.01
 ```
 
