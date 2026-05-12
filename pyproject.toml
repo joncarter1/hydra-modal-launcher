@@ -1,0 +1,64 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hydra-modal-launcher"
+version = "0.1.0"
+description = "Hydra launcher plugin that runs jobs on Modal (modal.com), with config-driven sandbox customisation."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Jonathan Carter" }]
+keywords = [
+    "hydra",
+    "modal",
+    "launcher",
+    "plugin",
+    "sweep",
+    "multirun",
+    "mlops",
+    "experiment",
+    "cloud-compute",
+    "serverless",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Framework :: Hydra",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering",
+    "Topic :: System :: Distributed Computing",
+    "Typing :: Typed",
+]
+dependencies = [
+    "hydra-core>=1.3",
+    "omegaconf>=2.3",
+    "modal>=1.4",
+    "cloudpickle>=2.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7",
+    "pytest-mock>=3",
+]
+
+[project.urls]
+Homepage = "https://github.com/joncarter1/hydra-modal-launcher"
+Repository = "https://github.com/joncarter1/hydra-modal-launcher"
+Issues = "https://github.com/joncarter1/hydra-modal-launcher/issues"
+Changelog = "https://github.com/joncarter1/hydra-modal-launcher/blob/main/CHANGELOG.md"
+
+[tool.setuptools.packages.find]
+include = ["hydra_plugins*"]
+namespaces = true
+
+[tool.setuptools.package-data]
+"hydra_plugins.hydra_modal_launcher" = ["py.typed"]

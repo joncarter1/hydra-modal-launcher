@@ -1,0 +1,18 @@
+defaults:
+  - _self_
+  - override hydra/launcher: modal
+
+lr: 0.01
+epochs: 10
+
+hydra:
+  launcher:
+    app_name: hydra-modal-example-custom
+    parallelism: 2
+    image:
+      # Every other field under image: is ignored when image_builder is set.
+      image_builder: example.custom_image.build_image
+    function:
+      cpu: 0.5
+      memory: 1024
+      timeout: 120

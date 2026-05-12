@@ -1,0 +1,48 @@
+# Publish to PyPI on tag push (e.g. `git tag v0.1.0 && git push --tags`).
+#
+# Uses PyPI trusted publishing (OIDC) — no API tokens stored in GitHub.
+# Before the first release:
+#   1. Create the project on PyPI (https://pypi.org/manage/account/publishing/)
+#      or add a "pending publisher" with owner=joncarter1, repo=hydra-modal-launcher,
+#      workflow=publish.yml, environment=pypi.
+#   2. In this repo: Settings → Environments → New environment → name `pypi`.
+
+name: publish
+
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Build sdist + wheel
+        run: uv build
+
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/hydra-modal-launcher
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - uses: pypa/gh-action-pypi-publish@release/v1

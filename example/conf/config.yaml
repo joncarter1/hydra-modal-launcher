@@ -1,0 +1,18 @@
+defaults:
+  - _self_
+  - override hydra/launcher: modal
+
+lr: 0.01
+epochs: 10
+
+hydra:
+  launcher:
+    app_name: hydra-modal-example
+    parallelism: 2
+    image:
+      pip_packages:
+        - hydra-core>=1.3
+    function:
+      cpu: 0.5
+      memory: 1024
+      timeout: 120
