@@ -1,8 +1,6 @@
 # Roadmap
 
-Open items the maintainer flagged but deferred from v0.1.0. None are blockers; they're improvements with clear scope.
-
-Convert to GitHub Issues once the repo is up.
+Open items the maintainer flagged but deferred from v0.1.0. None are blockers; they are improvements with clear scope. Track them as GitHub Issues as they get picked up.
 
 ## Correctness / robustness
 

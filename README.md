@@ -22,7 +22,7 @@ Each Hydra job runs as one invocation of a Modal function. The image and functio
 ## Install
 
 ```bash
-pip install hydra-modal-launcher        # once published to PyPI
+pip install hydra-modal-launcher
 # or, from a checkout:
 pip install -e ".[dev]"
 ```
@@ -279,7 +279,7 @@ For deeper conventions and invariants — what's pure vs impure, where Modal can
 
 - No `checkpoint` / preemption support — Modal has no equivalent of SLURM's signal protocol.
 - No automatic sync of remote working dirs back to your laptop. Use volumes if you need it.
-- Ephemeral apps only (`with app.run():`). Pre-deployed apps via `Function.from_name` are not yet supported.
+- Ephemeral apps only (`with app.run():`). Pre-deployed apps via `Function.from_name` are out of scope.
 - Image is rebuilt once per `launch()` call. Modal caches build layers so subsequent runs are fast.
 
 ## Troubleshooting
