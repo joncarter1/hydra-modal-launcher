@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-05-13
+
+### Fixed
+- Removed the invalid `Framework :: Hydra` PyPI classifier from `pyproject.toml` that caused the v0.2.0 publish workflow to fail with a 400 from PyPI. No functional change versus the intended v0.2.0; v0.2.0 was tagged but never published.
+
 ## [0.2.0] - 2026-05-12
 
 ### Added
@@ -31,6 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Auto-pinning of required runtime deps (`hydra-core`, `cloudpickle`) to the host's installed versions when adding them to the image; user-supplied version pins win on name collision.
 - Remote container stdout streamed to the local terminal via `modal.enable_output()`.
 
-[Unreleased]: https://github.com/joncarter1/hydra-modal-launcher/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/joncarter1/hydra-modal-launcher/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/joncarter1/hydra-modal-launcher/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/joncarter1/hydra-modal-launcher/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/joncarter1/hydra-modal-launcher/releases/tag/v0.1.0

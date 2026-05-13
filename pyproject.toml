@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hydra-modal-launcher"
-version = "0.2.0"
+version = "0.2.1"
 description = "Hydra launcher plugin that runs jobs on Modal (modal.com), with config-driven sandbox customisation."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -24,7 +24,6 @@ keywords = [
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
-    "Framework :: Hydra",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
