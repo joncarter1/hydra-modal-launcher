@@ -7,10 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-05-13
+
 ### Added
 - `env_passthrough: list[str]` field on `ModalLauncherConf`. Host env vars listed here are snapshotted at launch time and injected into each worker container via an ephemeral `modal.Secret.from_dict`, so values are available before user code starts. Use for per-launch runtime values (e.g. a tracking run ID set by a parent-side Hydra callback) that can't live in a static named secret. Missing keys log a warning rather than failing.
 - Dashboard URL logged via Python logging (`ModalLauncher: dashboard https://modal.com/apps/<app_id>`) inside the `app.run()` context. Goes through Hydra's `hydra_logging` so it can be routed to a file by configuring a file handler.
 - End-to-end failure-path test (`tests/test_e2e_failure.py`) that runs a deliberately-raising sweep on real Modal and verifies the `return_exceptions=True` → `JobReturn(FAILED)` → Hydra-sweeper chain. Marked `@pytest.mark.live`; run with `pytest --live`. Skipped in the default `pytest` invocation.
+- End-to-end `env_passthrough` test (`tests/test_e2e_env_passthrough.py`) verifying the host-env → `Secret.from_dict` → container `os.environ` chain end-to-end with a unique per-run marker. Also `@pytest.mark.live`.
 
 ## [0.2.1] - 2026-05-13
 
@@ -41,7 +44,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Auto-pinning of required runtime deps (`hydra-core`, `cloudpickle`) to the host's installed versions when adding them to the image; user-supplied version pins win on name collision.
 - Remote container stdout streamed to the local terminal via `modal.enable_output()`.
 
-[Unreleased]: https://github.com/joncarter1/hydra-modal-launcher/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/joncarter1/hydra-modal-launcher/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/joncarter1/hydra-modal-launcher/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/joncarter1/hydra-modal-launcher/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/joncarter1/hydra-modal-launcher/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/joncarter1/hydra-modal-launcher/releases/tag/v0.1.0
