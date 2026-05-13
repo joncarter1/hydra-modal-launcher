@@ -28,6 +28,12 @@ example/                   # Layout-A demo (entrypoint = `uv run example/my_app.
   ├── custom_image.py
   └── my_app.py
 tests/                     # Pure unit tests; no Modal account required
+  ├── conftest.py                   # Defines --live flag + auto-skip for @pytest.mark.live
+  ├── test_modal_launcher.py        # ConfigStore + pure helpers + path resolution
+  ├── test_e2e_failure.py           # @pytest.mark.live failure-path test; needs `pytest --live`
+  └── e2e/
+      ├── failure_app.py            # @hydra.main entry that always raises; driven by test_e2e_failure
+      └── conf/config.yaml
 ```
 
 ## Key invariants
@@ -93,6 +99,7 @@ See "Releasing" in `README.md`. SemVer tag `vX.Y.Z` → `publish.yml` builds + p
 | `pip_install_from_pyproject` SDK call (via `config_pyproject.yaml`) | Live run; container confirmed to import `tabulate` from `example/pyproject.toml`'s `[project].dependencies` |
 | `_resolve_against_project_root` resolution branches | Unit tests (4 cases — absolute, CWD-relative-exists, walk-up-hit, miss) |
 | Narrowed auto-mount when `example/pyproject.toml` is present + `PythonPackage:hydra_plugins` auto-discovery | Live run — basic and pyproject configs both work with `Created mount /Users/.../example` instead of the whole repo |
+| End-to-end failure path (container raises → `return_exceptions=True` → `JobReturn(FAILED)` → sweeper surfaces it) | Live test, `tests/test_e2e_failure.py` — run via `pytest --live` |
 | **End-to-end failure path** | NOT verified live — see `ROADMAP.md` |
 
 ## Cost notes for live E2E testing

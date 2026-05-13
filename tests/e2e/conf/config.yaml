@@ -1,0 +1,17 @@
+defaults:
+  - _self_
+  - override hydra/launcher: modal
+
+lr: 0.01
+
+hydra:
+  launcher:
+    app_name: hydra-modal-e2e-failure
+    parallelism: 2
+    image:
+      pip_packages:
+        - hydra-core>=1.3
+    function:
+      cpu: 0.5
+      memory: 1024
+      timeout: 60

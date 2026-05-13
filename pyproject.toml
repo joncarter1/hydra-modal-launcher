@@ -55,6 +55,11 @@ Repository = "https://github.com/joncarter1/hydra-modal-launcher"
 Issues = "https://github.com/joncarter1/hydra-modal-launcher/issues"
 Changelog = "https://github.com/joncarter1/hydra-modal-launcher/blob/main/CHANGELOG.md"
 
+[tool.pytest.ini_options]
+markers = [
+    "live: tests that run real sweeps on Modal; skipped unless `pytest --live` is passed.",
+]
+
 [tool.setuptools.packages.find]
 include = ["hydra_plugins*"]
 namespaces = true

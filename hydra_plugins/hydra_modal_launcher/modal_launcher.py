@@ -123,6 +123,9 @@ class ModalLauncher(Launcher):
 
         app, fn = build_modal_app(launcher_cfg)
         with modal.enable_output(), app.run():
+            # Logged through Hydra's handlers so the dashboard link persists
+            # to multirun.log; modal.enable_output() only writes to stderr.
+            log.info("ModalLauncher: dashboard https://modal.com/apps/%s", app.app_id)
             raw_results = list(fn.starmap(payloads, return_exceptions=True))
 
         return [

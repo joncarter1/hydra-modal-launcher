@@ -360,3 +360,9 @@ uv run pytest tests/
 
 `uv.lock` is committed, so the sync is reproducible. Unit tests don't require a Modal account; the orchestration is pure functions where possible.
 
+Live tests against real Modal are marked `@pytest.mark.live` and skipped by default. To run them (requires Modal credentials configured locally):
+
+```bash
+uv run pytest tests/ --live
+```
+

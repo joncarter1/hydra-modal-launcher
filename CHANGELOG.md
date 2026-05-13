@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Dashboard URL logged via Python logging (`ModalLauncher: dashboard https://modal.com/apps/<app_id>`) inside the `app.run()` context. Goes through Hydra's `hydra_logging` so it can be routed to a file by configuring a file handler.
+- End-to-end failure-path test (`tests/test_e2e_failure.py`) that runs a deliberately-raising sweep on real Modal and verifies the `return_exceptions=True` → `JobReturn(FAILED)` → Hydra-sweeper chain. Marked `@pytest.mark.live`; run with `pytest --live`. Skipped in the default `pytest` invocation.
+
 ## [0.2.1] - 2026-05-13
 
 ### Fixed
