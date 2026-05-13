@@ -33,7 +33,10 @@ tests/                     # Pure unit tests; no Modal account required
   ├── test_e2e_failure.py           # @pytest.mark.live failure-path test; needs `pytest --live`
   └── e2e/
       ├── failure_app.py            # @hydra.main entry that always raises; driven by test_e2e_failure
-      └── conf/config.yaml
+      ├── env_passthrough_app.py    # @hydra.main entry that logs HML_E2E_TOKEN; driven by test_e2e_env_passthrough
+      └── conf/
+          ├── config.yaml           # failure-test launcher config
+          └── env_passthrough.yaml  # env_passthrough-test launcher config
 ```
 
 ## Key invariants
@@ -100,6 +103,7 @@ See "Releasing" in `README.md`. SemVer tag `vX.Y.Z` → `publish.yml` builds + p
 | `_resolve_against_project_root` resolution branches | Unit tests (4 cases — absolute, CWD-relative-exists, walk-up-hit, miss) |
 | Narrowed auto-mount when `example/pyproject.toml` is present + `PythonPackage:hydra_plugins` auto-discovery | Live run — basic and pyproject configs both work with `Created mount /Users/.../example` instead of the whole repo |
 | End-to-end failure path (container raises → `return_exceptions=True` → `JobReturn(FAILED)` → sweeper surfaces it) | Live test, `tests/test_e2e_failure.py` — run via `pytest --live` |
+| End-to-end `env_passthrough` (host env var → ephemeral `Secret.from_dict` → container `os.environ`) | Live test, `tests/test_e2e_env_passthrough.py` — run via `pytest --live` |
 | **End-to-end failure path** | NOT verified live — see `ROADMAP.md` |
 
 ## Cost notes for live E2E testing

@@ -256,6 +256,30 @@ def test_modal_launcher_conf_defaults():
     # None -> resolved to host python at build time
     assert cfg.image.python_version is None
     assert cfg.function.timeout == 3600
+    assert cfg.env_passthrough == []
+
+
+def test_snapshot_env_passthrough_collects_present_keys_and_warns_on_missing(
+    monkeypatch, caplog
+):
+    import logging
+    from hydra_plugins.hydra_modal_launcher import modal_launcher as ml
+
+    monkeypatch.setenv("HML_PRESENT_KEY", "abc123")
+    monkeypatch.delenv("HML_MISSING_KEY", raising=False)
+
+    cfg = ModalLauncherConf()
+    cfg.env_passthrough = ["HML_PRESENT_KEY", "HML_MISSING_KEY"]
+    with caplog.at_level(logging.WARNING, logger=ml.log.name):
+        snapshot = ModalLauncher._snapshot_env_passthrough(cfg)
+
+    assert snapshot == {"HML_PRESENT_KEY": "abc123"}
+    assert any("HML_MISSING_KEY" in r.message for r in caplog.records)
+
+
+def test_snapshot_env_passthrough_empty_when_unset():
+    cfg = ModalLauncherConf()
+    assert ModalLauncher._snapshot_env_passthrough(cfg) == {}
 
 
 def test_build_image_spec_uses_host_python_when_unset():

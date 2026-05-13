@@ -221,6 +221,7 @@ hydra:
 | `app_name` | `"hydra-modal-launcher"` | passed to `modal.App(...)` |
 | `parallelism` | `-1` | `1` = serial, `N` caps concurrent containers via `max_containers=N`, `-1` = unbounded |
 | `dry_run` | `false` | log resolved spec and skip `app.run()` |
+| `env_passthrough` | `[]` | Host env vars to snapshot at launch time and inject into every worker container. Shipped as an ephemeral `modal.Secret.from_dict`, so values are present before user code starts. Use for per-launch runtime values (e.g. a tracking run ID set by a parent-side callback) that can't live in a static named secret. Missing keys log a warning and are skipped. |
 
 ## Per-job outputs
 

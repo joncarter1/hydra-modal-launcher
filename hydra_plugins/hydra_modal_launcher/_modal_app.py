@@ -208,12 +208,23 @@ def _build_image(image_cfg: ModalImageConf):
     return img
 
 
-def _resolve_function_kwargs(fcfg: ModalFunctionConf, parallelism: int) -> dict[str, Any]:
+def _resolve_function_kwargs(
+    fcfg: ModalFunctionConf,
+    parallelism: int,
+    runtime_env: dict[str, str] | None = None,
+) -> dict[str, Any]:
     import modal
 
     kwargs = build_function_kwargs(fcfg, parallelism)
+    secrets: list[Any] = []
     if fcfg.secrets:
-        kwargs["secrets"] = [modal.Secret.from_name(s) for s in fcfg.secrets]
+        secrets.extend(modal.Secret.from_name(s) for s in fcfg.secrets)
+    if runtime_env:
+        # Ephemeral, in-memory secret carrying host-snapshotted env vars.
+        # Bound to this Function definition only; not persisted in Modal.
+        secrets.append(modal.Secret.from_dict(runtime_env))
+    if secrets:
+        kwargs["secrets"] = secrets
     if fcfg.volumes:
         kwargs["volumes"] = {
             mp: modal.Volume.from_name(name)
@@ -222,11 +233,14 @@ def _resolve_function_kwargs(fcfg: ModalFunctionConf, parallelism: int) -> dict[
     return kwargs
 
 
-def build_modal_app(cfg: ModalLauncherConf):
+def build_modal_app(cfg: ModalLauncherConf, runtime_env: dict[str, str] | None = None):
     """Build a ``(modal.App, modal.Function)`` pair from launcher config.
 
     The function is the ephemeral entrypoint that runs one Hydra job.
-    Called once per ``ModalLauncher.launch`` invocation.
+    Called once per ``ModalLauncher.launch`` invocation. ``runtime_env``
+    is a host-snapshot of env vars (see ``ModalLauncherConf.env_passthrough``);
+    when non-empty, it is shipped as an ephemeral ``modal.Secret.from_dict``
+    so values land in the container before the worker process starts.
     """
     import modal
 
@@ -234,6 +248,6 @@ def build_modal_app(cfg: ModalLauncherConf):
 
     app = modal.App(cfg.app_name)
     image = _build_image(cfg.image)
-    fn_kwargs = _resolve_function_kwargs(cfg.function, cfg.parallelism)
+    fn_kwargs = _resolve_function_kwargs(cfg.function, cfg.parallelism, runtime_env=runtime_env)
     fn = app.function(image=image, **fn_kwargs)(_worker.modal_entry)
     return app, fn

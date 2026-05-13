@@ -1,0 +1,17 @@
+defaults:
+  - _self_
+  - override hydra/launcher: modal
+
+hydra:
+  launcher:
+    app_name: hydra-modal-e2e-env-passthrough
+    parallelism: 1
+    env_passthrough:
+      - HML_E2E_TOKEN
+    image:
+      pip_packages:
+        - hydra-core>=1.3
+    function:
+      cpu: 0.5
+      memory: 1024
+      timeout: 60

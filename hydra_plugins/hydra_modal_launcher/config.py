@@ -66,6 +66,11 @@ class ModalLauncherConf:
     dry_run: bool = False
     image: ModalImageConf = field(default_factory=ModalImageConf)
     function: ModalFunctionConf = field(default_factory=ModalFunctionConf)
+    # Env vars to snapshot from the launching host and inject into each worker
+    # container. Implemented as an ephemeral ``modal.Secret.from_dict`` so the
+    # values are set before the worker process starts (matching the timing of
+    # named secrets). Missing keys are skipped silently.
+    env_passthrough: List[str] = field(default_factory=list)
 
 
 def _register() -> None:

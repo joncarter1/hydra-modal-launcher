@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import inspect
 import logging
+import os
 from pathlib import Path
 from typing import Any, Sequence
 
@@ -100,13 +101,16 @@ class ModalLauncher(Launcher):
             for i, sweep_cfg in enumerate(sweep_configs)
         ]
 
+        runtime_env = self._snapshot_env_passthrough(launcher_cfg)
+
         if launcher_cfg.dry_run:
             from ._modal_app import build_function_kwargs, build_image_spec
 
             log.info(
-                "dry_run=True; image_spec=%s function_kwargs=%s",
+                "dry_run=True; image_spec=%s function_kwargs=%s env_passthrough=%s",
                 build_image_spec(launcher_cfg.image),
                 build_function_kwargs(launcher_cfg.function, launcher_cfg.parallelism),
+                sorted(runtime_env),
             )
             return [
                 JobReturn(
@@ -121,7 +125,7 @@ class ModalLauncher(Launcher):
 
         import modal
 
-        app, fn = build_modal_app(launcher_cfg)
+        app, fn = build_modal_app(launcher_cfg, runtime_env=runtime_env)
         with modal.enable_output(), app.run():
             # Logged through Hydra's handlers so the dashboard link persists
             # to multirun.log; modal.enable_output() only writes to stderr.
@@ -150,6 +154,30 @@ class ModalLauncher(Launcher):
             status=JobStatus.COMPLETED,
             _return_value=raw,
         )
+
+    @staticmethod
+    def _snapshot_env_passthrough(launcher_cfg: ModalLauncherConf) -> dict[str, str]:
+        """Read the host's current values for env vars listed in ``env_passthrough``.
+
+        Skips keys that aren't currently set. Returned dict is shipped to the
+        container as an ephemeral ``modal.Secret.from_dict`` so values are
+        available before user code starts. Useful for transporting per-launch
+        runtime values (e.g. a tracking run ID set by a parent-side callback)
+        that can't live in a static, named secret.
+        """
+        names = list(launcher_cfg.env_passthrough or ())
+        if not names:
+            return {}
+        snapshot = {k: os.environ[k] for k in names if k in os.environ}
+        missing = [k for k in names if k not in os.environ]
+        if missing:
+            log.warning(
+                "env_passthrough requested but not set on host: %s",
+                sorted(missing),
+            )
+        if snapshot:
+            log.info("env_passthrough snapshotting: %s", sorted(snapshot))
+        return snapshot
 
     def _maybe_auto_mount_user_source(self, launcher_cfg: ModalLauncherConf) -> None:
         """Add the user's task module to the image's mounts.
