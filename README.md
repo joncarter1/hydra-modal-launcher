@@ -1,43 +1,23 @@
 # hydra-modal-launcher
 
-A [Hydra](https://hydra.cc/) launcher plugin that ships multirun jobs to [Modal](https://modal.com/). Inspired by `hydra-submitit-launcher` and `hydra-ray-launcher`.
+[![PyPI](https://img.shields.io/pypi/v/hydra-modal-launcher.svg)](https://pypi.org/project/hydra-modal-launcher/)
+[![Python](https://img.shields.io/pypi/pyversions/hydra-modal-launcher.svg)](https://pypi.org/project/hydra-modal-launcher/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Each Hydra job runs as one invocation of a Modal function. The image and function spec (GPU, CPU, memory, secrets, volumes, timeout, parallelism) are configured from YAML. An `image_builder` escape hatch lets you produce a fully custom `modal.Image` in Python when YAML isn't enough.
+A [Hydra](https://hydra.cc/) launcher plugin that executes jobs as [Modal](https://modal.com/) functions.
 
-## Contents
-
-- [Install](#install)
-- [Quick start](#quick-start)
-- [Common recipes](#common-recipes)
-  - [Path resolution](#path-resolution)
-- [Configuration reference](#configuration-reference)
-- [Per-job outputs](#per-job-outputs)
-- [How the user's code reaches the container](#how-the-users-code-reaches-the-container)
-- [How it works](#how-it-works)
-- [Project structure](#project-structure)
-- [Gotchas](#gotchas)
-- [Limitations](#limitations)
-- [Troubleshooting](#troubleshooting)
-- [Testing](#testing)
-
-## Install
+## Quick start
 
 ```bash
 pip install hydra-modal-launcher
-# or, from a checkout:
-pip install -e ".[dev]"
 ```
-
-Requires `python>=3.10`, `hydra-core>=1.3`, and `modal>=1.4`. You also need [`modal token new`](https://modal.com/docs/guide#getting-started) to be configured on the host that runs the sweep.
-
-## Quick start
 
 ```python
 # my_app.py
 import hydra
 from omegaconf import DictConfig
 
-@hydra.main(version_base=None, config_path="conf", config_name="config")
+@hydra.main(version_base=None)
 def main(cfg: DictConfig) -> float:
     return float(cfg.lr) * float(cfg.epochs)
 
@@ -45,35 +25,33 @@ if __name__ == "__main__":
     main()
 ```
 
-```yaml
-# conf/config.yaml
-defaults:
-  - _self_
-  - override hydra/launcher: modal
-
-lr: 0.01
-epochs: 10
-
-hydra:
-  launcher:
-    parallelism: 3        # 1 = serial, N = cap, -1 = unlimited
-    image:
-      pip_packages: [hydra-core, omegaconf]
-    function:
-      cpu: 1
-      memory: 1024
-      timeout: 300
-```
-
-Launch a sweep:
-
 ```bash
-# Dry-run: log resolved spec without calling Modal
-uv run my_app.py --multirun hydra.launcher.dry_run=true lr=0.001,0.01,0.1
-
-# Real run (Modal credentials in env)
-uv run my_app.py --multirun lr=0.001,0.01,0.1
+uv run my_app.py --multirun hydra/launcher=modal +lr=0.001,0.01,0.1 +epochs=10
+# → 3 jobs run as 3 Modal functions, in parallel
 ```
+
+Image, function spec (GPU, CPU, memory, secrets, volumes, timeout) and parallelism are all configurable under `hydra.launcher` — see [Common recipes](#common-recipes).
+
+## Contents
+
+- [Quick start](#quick-start)
+- [Common recipes](#common-recipes)
+- [Configuration reference](#configuration-reference)
+- [Troubleshooting](#troubleshooting)
+
+<details>
+<summary>More</summary>
+
+- [Per-job outputs](#per-job-outputs)
+- [How the user's code reaches the container](#how-the-users-code-reaches-the-container)
+- [How it works](#how-it-works)
+- [Project structure](#project-structure)
+- [Gotchas](#gotchas)
+- [Limitations](#limitations)
+- [Testing](#testing)
+- [Credits](#credits)
+
+</details>
 
 ## Common recipes
 
@@ -86,7 +64,7 @@ hydra:
   launcher:
     parallelism: 4
     function:
-      gpu: "L40S"             # or "A100", "H100", "L40S:2" for 2x
+      gpu: "H100"
       memory: 16384
       timeout: 3600
     image:
@@ -366,4 +344,11 @@ Live tests against real Modal are marked `@pytest.mark.live` and skipped by defa
 ```bash
 uv run pytest tests/ --live
 ```
+
+## Credits
+
+Inspired by the official Hydra launcher plugins:
+
+- [`hydra-submitit-launcher`](https://github.com/facebookresearch/hydra/tree/main/plugins/hydra_submitit_launcher) — SLURM via [submitit](https://github.com/facebookincubator/submitit)
+- [`hydra-ray-launcher`](https://github.com/facebookresearch/hydra/tree/main/plugins/hydra_ray_launcher) — AWS via [Ray](https://www.ray.io/)
 
